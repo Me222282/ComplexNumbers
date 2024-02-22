@@ -16,5 +16,8 @@ namespace maths
         public static Real operator *(Real a, Real b) => a.Value * b.Value;
         public static Real operator /(Real a, Real b) => a.Value / b.Value;
         public static Real operator ^(Real a, Real b) => Math.Pow(a.Value, b.Value);
+        
+        public static Complex operator +(Real a, I b) => new Complex() { R = a, I = b};
+        public static Complex operator -(Real a, I b) => new Complex() { R = a, I = -b};
     }
 }

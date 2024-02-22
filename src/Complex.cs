@@ -37,7 +37,7 @@ namespace maths
             
             for (int j = 0; j <= i; j++)
             {
-                double v = nCr(i, j) * Math.Pow(a.R.Value, i - j) - Math.Pow(a.I.Value, j);
+                double v = nCr(i, j) * Math.Pow(a.R.Value, i - j) * Math.Pow(a.I.Value, j);
                 
                 if ((j / 2) % 2 == 1) { v = -v; }
                 if (j % 2 == 1)
