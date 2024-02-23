@@ -8,6 +8,16 @@ namespace maths
         
         public override string ToString() => $"{Value}i";
         
+        public override bool Equals(object obj)
+        {
+            return obj is I i && i.Value == Value;
+        }
+
+        public override int GetHashCode() => Value.GetHashCode();
+        
+        public static bool operator ==(I l, I r) => l.Equals(r);
+        public static bool operator !=(I l, I r) => !l.Equals(r);
+        
         public static explicit operator double(I v) => v.Value;
         public static explicit operator I(double v) => new I() { Value = v };
         public static I operator +(I a, I b) => (I)(a.Value + b.Value);

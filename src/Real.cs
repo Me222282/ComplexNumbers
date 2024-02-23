@@ -8,6 +8,16 @@ namespace maths
         
         public override string ToString() => Value.ToString();
         
+        public override bool Equals(object obj)
+        {
+            return obj is Real r && r.Value == Value;
+        }
+
+        public override int GetHashCode() => Value.GetHashCode();
+        
+        public static bool operator ==(Real l, Real r) => l.Equals(r);
+        public static bool operator !=(Real l, Real r) => !l.Equals(r);
+        
         public static implicit operator double(Real v) => v.Value;
         public static implicit operator Real(double v) => new Real() { Value = v };
         public static Real operator +(Real a, Real b) => a.Value + b.Value;

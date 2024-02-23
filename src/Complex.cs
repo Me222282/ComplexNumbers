@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using Zene.Structs;
 
 namespace maths
 {
@@ -7,8 +9,28 @@ namespace maths
         public Real R;
         public I I;
         
+        public double Modulus() => Math.Sqrt((R.Value * R.Value) + (I.Value * I.Value));
+        
         public override string ToString() => $"{R} + {I}";
         
+        public override bool Equals(object obj)
+        {
+            return obj is Complex complex &&
+                R == complex.R &&
+                I == complex.I;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(R, I);
+        }
+        
+        public static bool operator ==(Complex l, Complex r) => l.Equals(r);
+        public static bool operator !=(Complex l, Complex r) => !l.Equals(r);
+        
+        public static explicit operator Complex(Vector2 v) => new Complex() { R = v.X, I = (I)v.Y };
+        public static implicit operator Complex(double v) => new Complex() { R = v };
+        public static implicit operator Complex(I v) => new Complex() { I = v };
         public static Complex operator +(Complex a, Complex b)
             => new Complex() { R = a.R + b.R, I = a.I + b.I };
         public static Complex operator -(Complex a, Complex b)
