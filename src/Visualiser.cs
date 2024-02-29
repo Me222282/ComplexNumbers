@@ -5,27 +5,47 @@ using Zene.Windowing;
 
 namespace maths
 {
+    public enum Mode
+    {
+        Mag,
+        Real,
+        I,
+        Sum
+    }
+    
     public class Visualiser : Window
     {
         public Visualiser(int width, int height, string title, IExpression expression)
+            : this(width, height, title, new Graph(expression))
+        {
+            
+        }
+        public Visualiser(int width, int height, string title, IExpression y, IExpression x)
+            : this(width, height, title, new Graph(y, x))
+        {
+            
+        }
+        public Visualiser(int width, int height, string title, Graph expression)
             : base(width, height, title)
         {
             _exp = expression;
             GenerateMap();
             _shader = BasicShader.GetInstance();
+            //_lighting = new LightingShader(1, 1);
+            //_lighting.SetLight(0, new Light(ColourF3.White, ColourF3.Zero, 0.0014, 0.000007, new Vector3(0, -1, 0), true));
             
             _refCube = new DrawObject<Vector3, byte>(
                 new Vector3[]
                 {
-                    new Vector3(-1, 1, 1), 
-                    new Vector3(1, 1, 1),
-                    new Vector3(1, -1, 1),
-                    new Vector3(-1, -1, 1),
+                    new Vector3(-0.5, 0.5, 0.5), 
+                    new Vector3(0.5, 0.5, 0.5),
+                    new Vector3(0.5, -0.5, 0.5),
+                    new Vector3(-0.5, -0.5, 0.5),
 
-                    new Vector3(-1, 1, -1),
-                    new Vector3(1, 1, -1),
-                    new Vector3(1, -1, -1),
-                    new Vector3(-1, -1, -1)
+                    new Vector3(-0.5, 0.5, -0.5),
+                    new Vector3(0.5, 0.5, -0.5),
+                    new Vector3(0.5, -0.5, -0.5),
+                    new Vector3(-0.5, -0.5, -0.5)
                 }, new byte[]
                 {
                     // Front
@@ -59,10 +79,20 @@ namespace maths
         private DrawObject<Vector3, byte> _refCube;
         
         private Vector2 _size = (10, 10);
+        private int _dp = 1;
         private double _precision = 0.1;
+        public double Precision
+        {
+            get => _precision;
+            set
+            {
+                _precision = value;
+                _dp = (int)Math.Ceiling(-Math.Log10(_precision));
+            }
+        }
         
-        private IExpression _exp;
-        public IExpression Expression
+        private Graph _exp;
+        public Graph Expression
         {
             get => _exp;
             set
@@ -80,12 +110,26 @@ namespace maths
 
         private IMatrix _rotationMatrix;
 
-        private double _moveSpeed = 0.01;
+        private double _moveSpeed = 0.05;
+        private bool _gradColour = false;
         
         private BasicShader _shader;
+        private LightingShader _lighting;
         
+        private Mode _mode = Mode.Mag;
+        private PolygonMode _poly = PolygonMode.Line;
+        private double Round(double v)
+        {
+            return Math.Round(v, _dp, MidpointRounding.AwayFromZero);
+        }
         private void GenerateMap()
         {
+            if (_gradColour)
+            {
+                GenerateMapColour();
+                return;
+            }
+            
             Vector2 end = _size / 2d;
             
             Vector2 v = -end;
@@ -93,12 +137,29 @@ namespace maths
             Vector3[,] map = new Vector3[(int)(_size.Y / _precision) + 1, (int)(_size.X / _precision) + 1];
             
             Vector2I pos = 0;
-            while (v.Y <= end.Y)
+            while (Round(v.Y) <= end.Y)
             {
-                while (v.X <= end.X)
+                while (Round(v.X) <= end.X)
                 {
-                    Complex comp = _exp.Calculate((Complex)v);
-                    map[pos.Y, pos.X] = (v.X, comp.Modulus(), v.Y);
+                    Complex comp = _exp.Y.Calculate((Complex)v);
+                    double d = _mode switch
+                    {
+                        Mode.Mag => comp.Modulus(),
+                        Mode.Real => comp.R,
+                        Mode.I => comp.I.Value,
+                        Mode.Sum => comp.R + comp.I.Value,
+                        _ => throw new Exception()
+                    };
+                    
+                    if (_exp.Parameteric)
+                    {
+                        Complex vn = _exp.X.Calculate((Complex)v);
+                        map[pos.Y, pos.X] = (vn.R, d, vn.I.Value);
+                    }
+                    else
+                    {
+                        map[pos.Y, pos.X] = (v.X, d, v.Y);
+                    }
                     
                     pos.X++;
                     v.X += _precision;
@@ -145,7 +206,85 @@ namespace maths
                     AttributeSize.D3, BufferUsage.DrawFrequent);
             }
         }
-
+        
+        private unsafe void GenerateMapColour()
+        {
+            Vector2 end = _size / 2d;
+            
+            Vector2 v = -end;
+            
+            Vector3[,] map = new Vector3[(int)(_size.Y / _precision) + 1, ((int)(_size.X / _precision) + 1) * 2];
+            
+            Vector2I pos = 0;
+            while (Round(v.Y) <= end.Y)
+            {
+                while (Round(v.X) <= end.X)
+                {
+                    Complex comp = _exp.Y.Calculate((Complex)v);
+                    double d = _mode switch
+                    {
+                        Mode.Mag => comp.Modulus(),
+                        Mode.Real => comp.R,
+                        Mode.I => comp.I.Value,
+                        Mode.Sum => comp.R + comp.I.Value,
+                        _ => throw new Exception()
+                    };
+                    
+                    if (_exp.Parameteric)
+                    {
+                        Complex vn = _exp.X.Calculate((Complex)v);
+                        map[pos.Y, pos.X * 2] = (vn.R, d, vn.I.Value);
+                    }
+                    else
+                    {
+                        map[pos.Y, pos.X * 2] = (v.X, d, v.Y);
+                    }
+                    
+                    map[pos.Y, pos.X * 2 + 1] = (1d, (1 + Math.Sin(pos.Y)) / 2, (1 + Math.Cos(pos.X)) / 2);
+                    
+                    pos.X++;
+                    v.X += _precision;
+                }
+                
+                v.X = -end.X;
+                pos.X = 0;
+                pos.Y++;
+                v.Y += _precision;
+            }
+            
+            int w = map.GetLength(1) / 2;
+            uint[] ind = new uint[(map.GetLength(0) - 1) * (w - 1) * 6];
+            
+            int i = 0;
+            for (int y = 0; y < map.GetLength(0) - 1; y++)
+            {
+                for (int x = 0; x < w - 1; x++)
+                {
+                    ind[i] = (uint)((y * w) + x);
+                    i++;
+                    ind[i] = (uint)((y * w) + x + 1);
+                    i++;
+                    ind[i] = (uint)(((y + 1) * w) + x);
+                    i++;
+                    
+                    ind[i] = (uint)(((y + 1) * w) + x);
+                    i++;
+                    ind[i] = (uint)(((y + 1) * w) + x + 1);
+                    i++;
+                    ind[i] = (uint)((y * w) + x + 1);
+                    i++;
+                }
+            }
+            
+            fixed (Vector3* ptr = map)
+            {
+                _draw = new DrawObject<Vector3, uint>(
+                    new ReadOnlySpan<Vector3>(ptr, map.Length), ind, 2, 0,
+                    AttributeSize.D3, BufferUsage.DrawFrequent);
+                _draw.AddAttribute(ShaderLocation.Colour, 1, AttributeSize.D3);
+            }
+        }
+        
         protected override void OnUpdate(FrameEventArgs e)
         {
             base.OnUpdate(e);
@@ -163,22 +302,40 @@ namespace maths
             if (this[Keys.Space])   { cameraMove.Y -= _moveSpeed; }
             if (this[Mods.Control]) { cameraMove.Y += _moveSpeed; }
 
-            if (this[Keys.LeftShift])   { cameraMove *= 2; }
+            if (this[Keys.LeftShift])   { cameraMove *= 4; }
             if (this[Keys.RightShift])  { cameraMove *= 0.25; }
-            if (this[Mods.Alt])         { cameraMove *= 4; }
+            if (this[Mods.Alt])         { cameraMove *= 10; }
 
             CameraPos += cameraMove * new Matrix3(_rotationMatrix);
+            
+            //_lighting.CameraPosition = CameraPos;
+            //_lighting.DrawLighting = true;
+            //_lighting.ColourSource = ColourSource.UniformColour;
             
             DrawManager.View = Matrix4.CreateTranslation(CameraPos) * Matrix4.CreateRotationY(_rotateY) *
                 Matrix4.CreateRotationX(_rotateX) * Matrix4.CreateRotationZ(_rotateZ);
             
-            _shader.ColourSource = ColourSource.UniformColour;
-            _shader.Colour = ColourF.Orange;
             
-            State.PolygonMode = PolygonMode.Line;
-            e.Context.Shader = _shader;
+            Framebuffer.DepthState.Testing = true;
+            DrawManager.Shader = _shader;
+            //DrawManager.Shader = _lighting;
+            DrawManager.Shader.Colour = ColourF.Orange;
+            
+            if (_gradColour)
+            {
+                DrawManager.Shader.ColourSource = ColourSource.AttributeColour;
+            }
+            else
+            {
+                DrawManager.Shader.ColourSource = ColourSource.UniformColour;
+            }
+            
+            State.PolygonMode = _poly;
+            DrawManager.Model = Matrix4.CreateScale(1d, -1d, 1d);
             e.Context.Draw(_draw);
             
+            DrawManager.Shader.ColourSource = ColourSource.UniformColour;
+            DrawManager.Shader.Colour = ColourF.Aqua;
             e.Context.Draw(_refCube);
         }
 
@@ -187,7 +344,7 @@ namespace maths
             base.OnSizeChange(e);
             
             DrawManager.Projection = Matrix4.CreatePerspectiveFieldOfView(
-                Radian.Degrees(60), e.X / (double)e.Y, 0.1, 3000);
+                Radian.Degrees(80), e.X / (double)e.Y, 0.1, 3000);
         }
         
         protected override void OnKeyDown(KeyEventArgs e)
@@ -210,7 +367,6 @@ namespace maths
                 _rotateX = Radian.Percent(0.5);
                 _rotateY = 0;
                 _rotateZ = 0;
-                _moveSpeed = 1;
                 
                 return;
             }
@@ -223,6 +379,57 @@ namespace maths
                 }
 
                 CursorMode = CursorMode.Disabled;
+                return;
+            }
+            if (e[Keys.V] && e[Mods.Shift])
+            {
+                _mode--;
+                if (_mode < 0)
+                {
+                    _mode = Mode.Sum;
+                }
+                
+                GenerateMap();
+                return;
+            }
+            if (e[Keys.V])
+            {
+                _mode++;
+                if (_mode > Mode.Sum)
+                {
+                    _mode = Mode.Mag;
+                }
+                
+                GenerateMap();
+                return;
+            }
+            if (e[Keys.F])
+            {
+                if (_poly == PolygonMode.Fill)
+                {
+                    _poly = PolygonMode.Line;
+                    return;
+                }
+                
+                _poly = PolygonMode.Fill;
+                return;
+            }
+            if (e[Keys.Equal])
+            {
+                Precision *= 0.5;
+                GenerateMap();
+                return;
+            }
+            if (e[Keys.Minus])
+            {
+                Precision /= 0.5;
+                GenerateMap();
+                return;
+            }
+            if (e[Keys.C])
+            {
+                _gradColour = !_gradColour;
+                GenerateMap();
                 return;
             }
         }

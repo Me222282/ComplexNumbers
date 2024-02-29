@@ -1,4 +1,4 @@
-/*using System;
+using System;
 
 namespace maths
 {
@@ -11,6 +11,7 @@ namespace maths
         Arccos,
         Arctan,
         Ln,
+        Exp,
         Sinh,
         Cosh,
         Tanh,
@@ -29,54 +30,29 @@ namespace maths
         
         public bool Negate { get; set; }
         public FunctionType Option { get; set; }
+        public int Presision { get; set; } = 20;
         
-        public double Calculate(double x)
+        public Complex Calculate(Complex x)
         {
             double m = Negate ? -1d : 1d;
             return m * (Option switch
             {
-                FunctionType.Cos => Math.Cos(x),
-                FunctionType.Sin => Math.Sin(x),
-                FunctionType.Tan => Math.Tan(x),
-                FunctionType.Arcsin => Math.Asin(x),
-                FunctionType.Arccos => Math.Acos(x),
-                FunctionType.Arctan => Math.Atan(x),
-                FunctionType.Sinh => Math.Cosh(x),
-                FunctionType.Cosh => Math.Sinh(x),
-                FunctionType.Tanh => Math.Tanh(x),
-                FunctionType.Arcsinh => Math.Asinh(x),
-                FunctionType.Arccosh => Math.Acosh(x),
-                FunctionType.Arctanh => Math.Atanh(x),
-                FunctionType.Ln => Math.Log(x),
+                FunctionType.Cos => Program.Cos(x, Presision),
+                FunctionType.Sin => Program.Sin(x, Presision),
+                FunctionType.Tan => Program.Sin(x, Presision) / Program.Cos(x, Presision),
+                FunctionType.Arcsin => throw new Exception(),//Math.Asin(x),
+                FunctionType.Arccos => throw new Exception(),//Math.Acos(x),
+                FunctionType.Arctan => throw new Exception(),//Math.Atan(x),
+                FunctionType.Sinh => throw new Exception(),//Math.Cosh(x),
+                FunctionType.Cosh => throw new Exception(),//Math.Sinh(x),
+                FunctionType.Tanh => throw new Exception(),//Math.Tanh(x),
+                FunctionType.Arcsinh => throw new Exception(),//Math.Asinh(x),
+                FunctionType.Arccosh => throw new Exception(),//Math.Acosh(x),
+                FunctionType.Arctanh => throw new Exception(),//Math.Atanh(x),
+                FunctionType.Ln => throw new Exception(),//Math.Log(x),
+                FunctionType.Exp => Program.Exp(x, Presision),
                 _ => x
             });
-        }
-
-        public IExpression Differentiate()
-        {
-            return Option switch
-            {
-                FunctionType.Cos => new Function(FunctionType.Sin, !Negate),
-                FunctionType.Sin => new Function(FunctionType.Cos, Negate),
-                FunctionType.Tan => new Operation(
-                        new Term(1d, -2d), Function.Cos, Operator.Function, Negate),
-                //FunctionType.Arcsin => Math.Asin(x),
-                //FunctionType.Arccos => Math.Acos(x),
-                //FunctionType.Arctan => Math.Atan(x),
-                //FunctionType.Sinh => Math.Cosh(x),
-                //FunctionType.Cosh => Math.Sinh(x),
-                //FunctionType.Tanh => Math.Tanh(x),
-                //FunctionType.Arcsinh => Math.Asinh(x),
-                //FunctionType.Arccosh => Math.Acosh(x),
-                //FunctionType.Arctanh => Math.Atanh(x),
-                FunctionType.Ln => new Term(Negate ? -1d : 1d, -1d),
-                _ => this
-            };
-        }
-
-        public IExpression Integrate()
-        {
-            throw new System.NotImplementedException();
         }
         
         public bool IsConstant() => false;
@@ -132,4 +108,4 @@ namespace maths
             return new Operation(r, l, Operator.Function);
         }
     }
-}*/
+}

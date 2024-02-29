@@ -32,14 +32,6 @@ namespace maths
             
             return Coefficient * (x ^ (int)Power);
         }
-        public IExpression Differentiate()
-        {
-            return new Term(Coefficient * Power, Power - 1);
-        }
-        public IExpression Integrate()
-        {
-            return new Term(Coefficient / (Power + 1), Power + 1);
-        }
         
         public bool IsConstant() => Coefficient == 0d || Power == 0d;
         

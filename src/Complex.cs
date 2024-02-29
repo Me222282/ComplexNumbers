@@ -55,6 +55,9 @@ namespace maths
         }
         public static Complex operator ^(Complex a, int i)
         {
+            if (i == 0) { return 1d;}
+            if (i == 1) { return a; }
+            
             Complex r = new Complex();
             
             for (int j = 0; j <= i; j++)
