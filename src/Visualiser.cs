@@ -307,6 +307,7 @@ namespace maths
             if (this[Keys.LeftShift])   { cameraMove *= 4; }
             if (this[Keys.RightShift])  { cameraMove *= 0.25; }
             if (this[Mods.Alt])         { cameraMove *= 10; }
+            if (this[Keys.Q])   { cameraMove *= 100; }
 
             CameraPos += cameraMove * new Matrix3(_rotationMatrix);
             
@@ -460,7 +461,13 @@ namespace maths
             double distanceY = e.Y - _mouseLocation.Y;
 
             _mouseLocation = new Vector2(e.X, e.Y);
-
+            
+            if (this[Keys.RightAlt])
+            {
+                distanceX *= 0.1;
+                distanceY *= 0.1;
+            }
+            
             _rotateY += Radian.Degrees(distanceX * 0.1);
             _rotateX += Radian.Degrees(distanceY * 0.1);
         }
