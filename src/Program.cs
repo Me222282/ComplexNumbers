@@ -6,25 +6,12 @@ namespace maths
     class Program
     {
         static void Main(string[] args)
-        {
-            /*
-            Console.WriteLine($"{(7 + (I)8) * (4 + (I)2)}");
-            Console.WriteLine($"{(1 + (I)2) ^ 6}");
-            
-            //Console.WriteLine($"{Exp(7 + (I)1, 5)}");
-            //Console.WriteLine($"{Exp(7 + (I)1, 10)}");
-            Console.WriteLine($"{Exp(7 + (I)1, 20)}");
-            
-            //Console.WriteLine($"{LnP1((I)0.5, 20)}");
-            //Console.WriteLine($"{Ln(4 - (I)1, 20)}");
-            Console.WriteLine($"{Ln((I)1, 20)}");
-            Console.WriteLine($"{Ln((I)1, 40)}");*/
-            
+        {   
             Core.Init();
             
             //IExpression e = new Term(1d, 2d) + new Term(1d, 1d) + new Term(1d, 0d) - new Term(0.5d, 3d) - new Term(0.1d, 4d);
             IExpression e = Function.Tanh;
-            //IExpression e = Function.Sin * (new Operation(Function.Cos, new Term(2, 1), Operator.Function));
+            //IExpression e = Function.Sin * (Function.Cos < new Term(2, 1));
             
             //Visualiser program = new Visualiser(800, 500, "ertgyh", e);
             Visualiser program = new Visualiser(800, 500, "ertgyh",
