@@ -28,8 +28,8 @@ namespace maths
             
             //Visualiser program = new Visualiser(800, 500, "ertgyh", e);
             Visualiser program = new Visualiser(800, 500, "ertgyh",
-                //new Operation(Function.Sin, new Term(2, 1), Operator.Function), Function.Cos);
-                //Function.Cos * new Operation(Function.Tan, new Term(3, 1), Operator.Function));
+                //Function.Sin < new Term(2, 1), Function.Cos);
+                //Function.Cos * Function.Tan < new Term(3, 1));
                 Function.Tanh * Function.Cos, Function.Sin);
             program.Run();
             
