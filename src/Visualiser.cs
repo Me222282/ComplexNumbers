@@ -112,6 +112,8 @@ namespace maths
 
         private double _moveSpeed = 0.05;
         private bool _gradColour = false;
+        private double _fov = 80d;
+        private double _renderDist = 3000d;
         
         private BasicShader _shader;
         private LightingShader _lighting;
@@ -344,7 +346,7 @@ namespace maths
             base.OnSizeChange(e);
             
             DrawManager.Projection = Matrix4.CreatePerspectiveFieldOfView(
-                Radian.Degrees(80), e.X / (double)e.Y, 0.1, 3000);
+                Radian.Degrees(_fov), e.X / (double)e.Y, 0.1, _renderDist);
         }
         
         protected override void OnKeyDown(KeyEventArgs e)
@@ -414,6 +416,18 @@ namespace maths
                 _poly = PolygonMode.Fill;
                 return;
             }
+            if (e[Keys.Equal] && e[Mods.Shift])
+            {
+                _size *= 2d;
+                GenerateMap();
+                return;
+            }
+            if (e[Keys.Minus] && e[Mods.Shift])
+            {
+                _size /= 2d;
+                GenerateMap();
+                return;
+            }
             if (e[Keys.Equal])
             {
                 Precision *= 0.5;
@@ -449,6 +463,25 @@ namespace maths
 
             _rotateY += Radian.Degrees(distanceX * 0.1);
             _rotateX += Radian.Degrees(distanceY * 0.1);
+        }
+        protected override void OnScroll(ScrollEventArgs e)
+        {
+            base.OnScroll(e);
+            
+            if (this[Mods.Shift])
+            {
+                _renderDist *= e.DeltaY > 0 ? 2d : 0.5;
+            }
+            else
+            {
+                _fov *= e.DeltaY > 0 ? 0.9 : 1.1;
+                
+                if (_fov > 180d) { _fov = 180d; }
+                if (_fov <= 0d) { _fov = 0.5; }
+            }
+            
+            DrawManager.Projection = Matrix4.CreatePerspectiveFieldOfView(
+                Radian.Degrees(_fov), Size.X / (double)Size.Y, 0.1, _renderDist);
         }
     }
 }

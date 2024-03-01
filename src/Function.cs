@@ -43,9 +43,9 @@ namespace maths
                 FunctionType.Arcsin => throw new Exception(),//Math.Asin(x),
                 FunctionType.Arccos => throw new Exception(),//Math.Acos(x),
                 FunctionType.Arctan => throw new Exception(),//Math.Atan(x),
-                FunctionType.Sinh => throw new Exception(),//Math.Cosh(x),
-                FunctionType.Cosh => throw new Exception(),//Math.Sinh(x),
-                FunctionType.Tanh => throw new Exception(),//Math.Tanh(x),
+                FunctionType.Sinh => Program.Sinh(x, Presision),
+                FunctionType.Cosh => Program.Cos(x, Presision),
+                FunctionType.Tanh => Program.Sinh(x, Presision) / Program.Cosh(x, Presision),
                 FunctionType.Arcsinh => throw new Exception(),//Math.Asinh(x),
                 FunctionType.Arccosh => throw new Exception(),//Math.Acosh(x),
                 FunctionType.Arctanh => throw new Exception(),//Math.Atanh(x),
@@ -67,6 +67,9 @@ namespace maths
         public static Function Sin { get; } = new Function(FunctionType.Sin);
         public static Function Cos { get; } = new Function(FunctionType.Cos);
         public static Function Tan { get; } = new Function(FunctionType.Tan);
+        public static Function Sinh { get; } = new Function(FunctionType.Sinh);
+        public static Function Cosh { get; } = new Function(FunctionType.Cosh);
+        public static Function Tanh { get; } = new Function(FunctionType.Tanh);
         public static IExpression Sec { get; } = new Operation(new Term(1d, -1d), Function.Cos, Operator.Function);
         public static IExpression Cosec { get; } = new Operation(new Term(1d, -1d), Function.Sin, Operator.Function);
         public static IExpression Cot { get; } = new Operation(new Term(1d, -1d), Function.Tan, Operator.Function);

@@ -23,13 +23,14 @@ namespace maths
             Core.Init();
             
             //IExpression e = new Term(1d, 2d) + new Term(1d, 1d) + new Term(1d, 0d) - new Term(0.5d, 3d) - new Term(0.1d, 4d);
-            IExpression e = Function.Tan;
+            IExpression e = Function.Tanh;
             //IExpression e = Function.Sin * (new Operation(Function.Cos, new Term(2, 1), Operator.Function));
             
             //Visualiser program = new Visualiser(800, 500, "ertgyh", e);
             Visualiser program = new Visualiser(800, 500, "ertgyh",
-                new Operation(Function.Sin, new Term(2, 1), Operator.Function), Function.Cos);
+                //new Operation(Function.Sin, new Term(2, 1), Operator.Function), Function.Cos);
                 //Function.Cos * new Operation(Function.Tan, new Term(3, 1), Operator.Function));
+                Function.Tanh * Function.Cos, Function.Sin);
             program.Run();
             
             Core.Terminate();
@@ -81,7 +82,7 @@ namespace maths
             }
             
             return v;*/
-            return (I)(-Math.Sinh(c.I.Value) * Math.Cos(c.R)) + (Math.Cosh(c.I.Value) * Math.Sin(c.R));
+            return (I)(Math.Sinh(c.I.Value) * Math.Cos(c.R)) + (Math.Cosh(c.I.Value) * Math.Sin(c.R));
         }
         public static Complex Cos(Complex c, int ac)
         {
@@ -107,7 +108,15 @@ namespace maths
             }
             
             return v;*/
-            return (Math.Cosh(c.I.Value) * Math.Cos(c.R)) - (I)(-Math.Sinh(c.I.Value) * Math.Sin(c.R));
+            return (Math.Cosh(c.I.Value) * Math.Cos(c.R)) - (I)(Math.Sinh(c.I.Value) * Math.Sin(c.R));
+        }
+        public static Complex Sinh(Complex c, int ac)
+        {
+            return (I)(-Math.Sin(-c.I.Value) * Math.Cosh(c.R)) + (Math.Cos(-c.I.Value) * Math.Sinh(c.R));
+        }
+        public static Complex Cosh(Complex c, int ac)
+        {
+            return (Math.Cos(-c.I.Value) * Math.Cosh(c.R)) - (I)(-Math.Sin(-c.I.Value) * Math.Sinh(c.R));
         }
         public static Complex LnP1(Complex c, int ac)
         {
