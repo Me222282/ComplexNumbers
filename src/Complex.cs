@@ -57,7 +57,14 @@ namespace maths
         {
             if (i == 0) { return 1d;}
             if (i == 1) { return a; }
+            if (i == -1) { return 1d / a; }
             
+            bool recp = false;
+            if (i < 0)
+            {
+                recp = true;
+                i = -i;
+            }
             Complex r = new Complex();
             
             for (int j = 0; j <= i; j++)
@@ -74,6 +81,7 @@ namespace maths
                 r.R.Value += v;
             }
             
+            if (recp) { return 1d / r; }
             return r;
         }
         

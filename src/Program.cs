@@ -18,6 +18,7 @@ namespace maths
                 //Function.Sin < new Term(2, 1), Function.Cos);
                 //Function.Cos * Function.Tan < new Term(3, 1));
                 Function.Tanh * Function.Cos, Function.Sin);
+                //new Term(1d, 1d) * Function.Sech, new Term(1d, 1d) * Function.Cosech);
             program.Run();
             
             Core.Terminate();

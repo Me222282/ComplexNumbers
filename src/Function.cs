@@ -73,6 +73,9 @@ namespace maths
         public static IExpression Sec { get; } = new Operation(new Term(1d, -1d), Function.Cos, Operator.Function);
         public static IExpression Cosec { get; } = new Operation(new Term(1d, -1d), Function.Sin, Operator.Function);
         public static IExpression Cot { get; } = new Operation(new Term(1d, -1d), Function.Tan, Operator.Function);
+        public static IExpression Sech { get; } = new Operation(new Term(1d, -1d), Function.Cosh, Operator.Function);
+        public static IExpression Cosech { get; } = new Operation(new Term(1d, -1d), Function.Sinh, Operator.Function);
+        public static IExpression Coth { get; } = new Operation(new Term(1d, -1d), Function.Tanh, Operator.Function);
         public static Function Ln { get; } = new Function(FunctionType.Ln);
         public static Function NSin { get; } = new Function(FunctionType.Sin, true);
         public static Function NCos { get; } = new Function(FunctionType.Cos, true);
