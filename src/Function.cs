@@ -49,7 +49,7 @@ namespace maths
                 FunctionType.Arcsinh => throw new Exception(),//Math.Asinh(x),
                 FunctionType.Arccosh => throw new Exception(),//Math.Acosh(x),
                 FunctionType.Arctanh => throw new Exception(),//Math.Atanh(x),
-                FunctionType.Ln => throw new Exception(),//Math.Log(x),
+                FunctionType.Ln => Program.Ln(x, Presision),
                 FunctionType.Exp => Program.Exp(x, Presision),
                 _ => x
             });
@@ -64,6 +64,30 @@ namespace maths
                 f.Negate == Negate;
         }
 
+        public override string ToString()
+        {
+            return Option switch
+            {
+                FunctionType.Cos => "cos(x)",
+                FunctionType.Sin => "sin(x)",
+                FunctionType.Tan => "tan(x)",
+                FunctionType.Arcsin => "arcsin(x)",
+                FunctionType.Arccos => "arccos(x)",
+                FunctionType.Arctan => "arctan(x)",
+                FunctionType.Sinh => "sinh(x)",
+                FunctionType.Cosh => "cosh(x)",
+                FunctionType.Tanh => "tanh(x)",
+                FunctionType.Arcsinh => "arcsinh(x)",
+                FunctionType.Arccosh => "arccosh(x)",
+                FunctionType.Arctanh => "arctanh(x)",
+                FunctionType.Ln => "ln(x)",
+                FunctionType.Exp => "e^x",
+                _ => throw new Exception()
+            };
+        }
+
+        public override int GetHashCode() => HashCode.Combine(Negate, Option);
+
         public static Function Sin { get; } = new Function(FunctionType.Sin);
         public static Function Cos { get; } = new Function(FunctionType.Cos);
         public static Function Tan { get; } = new Function(FunctionType.Tan);
@@ -77,6 +101,7 @@ namespace maths
         public static IExpression Cosech { get; } = new Operation(new Term(1d, -1d), Function.Sinh, Operator.Function);
         public static IExpression Coth { get; } = new Operation(new Term(1d, -1d), Function.Tanh, Operator.Function);
         public static Function Ln { get; } = new Function(FunctionType.Ln);
+        public static Function Exp { get; } = new Function(FunctionType.Exp);
         public static Function NSin { get; } = new Function(FunctionType.Sin, true);
         public static Function NCos { get; } = new Function(FunctionType.Cos, true);
         public static Function NTan { get; } = new Function(FunctionType.Tan, true);

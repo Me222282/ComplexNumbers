@@ -116,7 +116,7 @@ namespace maths
         private double _renderDist = 3000d;
         
         private BasicShader _shader;
-        private LightingShader _lighting;
+        //private LightingShader _lighting;
         
         private Mode _mode = Mode.Mag;
         private PolygonMode _poly = PolygonMode.Line;

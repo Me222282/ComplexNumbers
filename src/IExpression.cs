@@ -37,5 +37,15 @@ namespace maths
         {
             return new Operation(r, l, Operator.Function);
         }
+        
+        public IExpression Simplify()
+        {
+            if (this is Operation op)
+            {
+                return op.Simplify();
+            }
+            
+            return this;
+        }
     }
 }

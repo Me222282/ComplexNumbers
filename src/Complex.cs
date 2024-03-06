@@ -6,12 +6,39 @@ namespace maths
 {
     public struct Complex
     {
+        private const double _pi2 = Math.PI * 2d;
+        
         public Real R;
         public I I;
         
         public double Modulus() => Math.Sqrt((R.Value * R.Value) + (I.Value * I.Value));
+        public double Argument()
+        {
+            double arg = Math.Atan(I.Value / R.Value);
+            if (R.Value < 0)
+            {
+                arg += Math.PI;
+            }
+            if (arg > Math.PI)
+            {
+                arg -= _pi2;
+            }
+            return arg;
+        }
         
-        public override string ToString() => $"{R} + {I}";
+        public override string ToString()
+        {
+            if (I.Value == 0d)
+            {
+                return R.ToString();
+            }
+            if (R.Value == 0d)
+            {
+                return I.ToString();
+            }
+            
+            return $"{R} + {I}";
+        }
         
         public override bool Equals(object obj)
         {
@@ -83,6 +110,25 @@ namespace maths
             
             if (recp) { return 1d / r; }
             return r;
+        }
+        public static Complex operator ^(Complex a, Complex b)
+        {
+            if (a.I.Value == 0d)
+            {
+                if (b.I.Value == 0d)
+                {
+                    return Math.Pow(a.R, b.R);
+                }
+                
+                return Program.Exp(Math.Log(a.R) * b, 20);
+            }
+            
+            if (b.I.Value == 0d && ((int)b.R) == b.R)
+            {
+                return a ^ (int)b.R;
+            }
+            
+            return Program.Exp(Program.Ln(a, 20) * b, 20);
         }
         
         public static long nCr(int n, int r)

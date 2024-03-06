@@ -6,20 +6,92 @@ namespace maths
     class Program
     {
         static void Main(string[] args)
-        {   
+        {
             Core.Init();
             
             //IExpression e = new Term(1d, 2d) + new Term(1d, 1d) + new Term(1d, 0d) - new Term(0.5d, 3d) - new Term(0.1d, 4d);
             IExpression e = Function.Tanh;
             //IExpression e = Function.Sin * (Function.Cos < new Term(2, 1));
             
+            Decoder decode = new Decoder();
+            
+            while (true)
+            {
+                Graph graph = new Graph();
+                Console.Write("Q, L or P: ");
+                ConsoleKeyInfo cki = Console.ReadKey();
+                if (cki.Key == ConsoleKey.Q) { break; }
+                if (cki.Key == ConsoleKey.L)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Equation:");
+                    string xy = Console.ReadLine();
+                    try
+                    {
+                        decode.Decode(xy);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("An error occurred.");
+                        continue;
+                    }
+                    graph.Y = decode.Expression.Simplify();
+                    
+                    Console.WriteLine(graph.Y);
+                }
+                else if (cki.Key == ConsoleKey.P)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Equation for X:");
+                    string tx = Console.ReadLine();
+                    try
+                    {
+                        decode.Decode(tx);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("An error occurred.");
+                        continue;
+                    }
+                    graph.X = decode.Expression.Simplify();
+                    Console.WriteLine("Equation for Y:");
+                    string ty = Console.ReadLine();
+                    try
+                    {
+                        decode.Decode(ty);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("An error occurred.");
+                        continue;
+                    }
+                    graph.Y = decode.Expression.Simplify();
+                    
+                    Console.WriteLine(graph.X);
+                    Console.WriteLine(graph.Y);
+                }
+                else
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Invalid command.");
+                    continue;
+                }
+                
+                Console.WriteLine("Press any key to continue.");
+                Console.ReadKey();
+                
+                Visualiser program = new Visualiser(800, 500, "ertgyh", graph);
+                program.Run();
+                program.Dispose();
+            }
+            /*
             //Visualiser program = new Visualiser(800, 500, "ertgyh", e);
             Visualiser program = new Visualiser(800, 500, "ertgyh",
                 //Function.Sin < new Term(2, 1), Function.Cos);
                 //Function.Cos * Function.Tan < new Term(3, 1));
                 Function.Tanh * Function.Cos, Function.Sin);
                 //new Term(1d, 1d) * Function.Sech, new Term(1d, 1d) * Function.Cosech);
-            program.Run();
+            program.Run();*/
             
             Core.Terminate();
         }
@@ -121,14 +193,6 @@ namespace maths
             
             return v;
         }
-        public static Complex Ln(Complex c, int ac)
-        {
-            double r = c.R;
-            if (r == 0)
-            {
-                return LnP1(c - 1, ac);
-            }
-            return LnP1(new Complex() { I = c.I } / r, ac) + Math.Log(r);
-        }
+        public static Complex Ln(Complex c, int ac) => Math.Log(c.Modulus()) + (I)c.Argument();
     }
 }
