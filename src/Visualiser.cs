@@ -10,7 +10,8 @@ namespace maths
         Mag,
         Real,
         I,
-        Sum
+        Sum,
+        Arg
     }
     
     public class Visualiser : Window
@@ -142,26 +143,8 @@ namespace maths
             while (Round(v.Y) <= end.Y)
             {
                 while (Round(v.X) <= end.X)
-                {
-                    Complex comp = _exp.Y.Calculate((Complex)v);
-                    double d = _mode switch
-                    {
-                        Mode.Mag => comp.Modulus(),
-                        Mode.Real => comp.R,
-                        Mode.I => comp.I.Value,
-                        Mode.Sum => comp.R + comp.I.Value,
-                        _ => throw new Exception()
-                    };
-                    
-                    if (_exp.Parameteric)
-                    {
-                        Complex vn = _exp.X.Calculate((Complex)v);
-                        map[pos.Y, pos.X] = (vn.R, d, vn.I.Value);
-                    }
-                    else
-                    {
-                        map[pos.Y, pos.X] = (v.X, d, v.Y);
-                    }
+                {   
+                    map[pos.Y, pos.X] = _exp.Calculate((Complex)v, _mode);
                     
                     pos.X++;
                     v.X += _precision;
@@ -222,25 +205,7 @@ namespace maths
             {
                 while (Round(v.X) <= end.X)
                 {
-                    Complex comp = _exp.Y.Calculate((Complex)v);
-                    double d = _mode switch
-                    {
-                        Mode.Mag => comp.Modulus(),
-                        Mode.Real => comp.R,
-                        Mode.I => comp.I.Value,
-                        Mode.Sum => comp.R + comp.I.Value,
-                        _ => throw new Exception()
-                    };
-                    
-                    if (_exp.Parameteric)
-                    {
-                        Complex vn = _exp.X.Calculate((Complex)v);
-                        map[pos.Y, pos.X * 2] = (vn.R, d, vn.I.Value);
-                    }
-                    else
-                    {
-                        map[pos.Y, pos.X * 2] = (v.X, d, v.Y);
-                    }
+                    map[pos.Y, pos.X * 2] = _exp.Calculate((Complex)v, _mode);
                     
                     map[pos.Y, pos.X * 2 + 1] = (1d, (1 + Math.Sin(pos.Y)) / 2, (1 + Math.Cos(pos.X)) / 2);
                     
@@ -389,7 +354,7 @@ namespace maths
                 _mode--;
                 if (_mode < 0)
                 {
-                    _mode = Mode.Sum;
+                    _mode = Mode.Arg;
                 }
                 
                 GenerateMap();
@@ -398,7 +363,7 @@ namespace maths
             if (e[Keys.V])
             {
                 _mode++;
-                if (_mode > Mode.Sum)
+                if (_mode > Mode.Arg)
                 {
                     _mode = Mode.Mag;
                 }

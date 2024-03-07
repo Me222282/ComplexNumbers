@@ -9,16 +9,12 @@ namespace maths
         {
             Core.Init();
             
-            //IExpression e = new Term(1d, 2d) + new Term(1d, 1d) + new Term(1d, 0d) - new Term(0.5d, 3d) - new Term(0.1d, 4d);
-            IExpression e = Function.Tanh;
-            //IExpression e = Function.Sin * (Function.Cos < new Term(2, 1));
-            
             Decoder decode = new Decoder();
             
             while (true)
             {
                 Graph graph = new Graph();
-                Console.Write("Q, S or P: ");
+                Console.Write("Q, S, P or 3: ");
                 ConsoleKeyInfo cki = Console.ReadKey();
                 if (cki.Key == ConsoleKey.Q) { break; }
                 if (cki.Key == ConsoleKey.S)
@@ -69,6 +65,50 @@ namespace maths
                     
                     Console.WriteLine(graph.X);
                     Console.WriteLine(graph.Y);
+                }
+                else if (cki.Key == ConsoleKey.D3)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Equation for X:");
+                    string tx = Console.ReadLine();
+                    try
+                    {
+                        decode.Decode(tx);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("An error occurred.");
+                        continue;
+                    }
+                    graph.X = decode.Expression.Simplify();
+                    Console.WriteLine("Equation for Y:");
+                    string ty = Console.ReadLine();
+                    try
+                    {
+                        decode.Decode(ty);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("An error occurred.");
+                        continue;
+                    }
+                    graph.Y = decode.Expression.Simplify();
+                    Console.WriteLine("Equation for Z:");
+                    string tz = Console.ReadLine();
+                    try
+                    {
+                        decode.Decode(tz);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("An error occurred.");
+                        continue;
+                    }
+                    graph.Z = decode.Expression.Simplify();
+                    
+                    Console.WriteLine(graph.X);
+                    Console.WriteLine(graph.Y);
+                    Console.WriteLine(graph.Z);
                 }
                 else
                 {

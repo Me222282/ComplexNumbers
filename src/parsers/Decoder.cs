@@ -22,6 +22,11 @@ namespace maths
         
         public void Decode(string str)
         {
+            if (str is null || str.Length == 0)
+            {
+                throw new Exception("String was empty");
+            }
+            
             Span<Keyword> sk = Getwords(str);
             
             _inst = new DecodeInst();
