@@ -229,6 +229,8 @@ namespace maths
             public bool Subsec;
             public bool Subsec2;
             
+            public bool Negate;
+            
             public void Manage(IWordParser wp)
             {                
                 if (_inst is not null)
@@ -281,10 +283,21 @@ namespace maths
                 IExpression e = wp.Expression;
                 Operator o = wp.Op;
                 
+                if (Negate)
+                {
+                    e = e.Negative();
+                    Negate = false;
+                }
+                
                 if (e is null)
                 {
                     if (Current is null || Op is not null)
                     {
+                        if (o == Operator.Subtract)
+                        {
+                            Negate = true;
+                            return;
+                        }
                         throw new Exception();
                     }
                     if (!Subsec && Current is Operation op)

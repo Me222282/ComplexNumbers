@@ -19,6 +19,10 @@ namespace maths
             get => double.IsNegative(Coefficient.R);
             set
             {
+                if (value)
+                {
+                    Coefficient = -Coefficient;
+                }
                 //double c = Math.Abs(Coefficient);
                 
                 //Coefficient = value ? -c : c;

@@ -54,6 +54,15 @@ namespace maths
                 case "coth":
                     Expression = Function.Coth;
                     break;
+                case "ln":
+                    Expression = Function.Ln;
+                    break;
+                case "exp":
+                    Expression = Function.Exp;
+                    break;
+                case "log":
+                    Expression = new Operation(new Term(10d, 0d), new Term(1d, 1d), Operator.Logarithm);
+                    break;
                     
                 default:
                     return false;

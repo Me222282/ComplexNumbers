@@ -18,10 +18,10 @@ namespace maths
             while (true)
             {
                 Graph graph = new Graph();
-                Console.Write("Q, L or P: ");
+                Console.Write("Q, S or P: ");
                 ConsoleKeyInfo cki = Console.ReadKey();
                 if (cki.Key == ConsoleKey.Q) { break; }
-                if (cki.Key == ConsoleKey.L)
+                if (cki.Key == ConsoleKey.S)
                 {
                     Console.WriteLine();
                     Console.WriteLine("Equation:");

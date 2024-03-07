@@ -47,5 +47,20 @@ namespace maths
             
             return this;
         }
+        public IExpression Negative()
+        {
+            if (this is Term t)
+            {
+                t.Coefficient = -t.Coefficient;
+                return t;
+            }
+            if (this is Function f)
+            {
+                return new Function(f.Option, !f.Negate);
+            }
+            
+            Negate = !Negate;
+            return this;
+        }
     }
 }
