@@ -234,5 +234,21 @@ namespace maths
             return v;
         }
         public static Complex Ln(Complex c, int ac) => Math.Log(c.Modulus()) + (I)c.Argument();
+    
+        public static Complex Arctan(Complex c)
+        {
+            double r = 0.5 * Math.Atan((2 * c.R.Value) / (1 - (c.R.Value * c.R.Value) - (c.I.Value * c.I.Value)));
+            double i = -0.5 * Math.Atanh((-2 * c.I.Value) / (1 + (c.R.Value * c.R.Value) + (c.I.Value * c.I.Value)));
+            if (c.R.Value > 0 && r < 0)
+            {
+                r += Math.PI / 2d;
+            }
+            else if (c.R.Value < 0 && r > 0)
+            {
+                r -= Math.PI / 2d;
+            }
+            
+            return r + (I)i;
+        }
     }
 }

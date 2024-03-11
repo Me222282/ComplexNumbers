@@ -42,7 +42,7 @@ namespace maths
                 FunctionType.Tan => Program.Sin(x, Presision) / Program.Cos(x, Presision),
                 FunctionType.Arcsin => throw new Exception(),//Math.Asin(x),
                 FunctionType.Arccos => throw new Exception(),//Math.Acos(x),
-                FunctionType.Arctan => throw new Exception(),//Math.Atan(x),
+                FunctionType.Arctan => Program.Arctan(x),
                 FunctionType.Sinh => Program.Sinh(x, Presision),
                 FunctionType.Cosh => Program.Cos(x, Presision),
                 FunctionType.Tanh => Program.Sinh(x, Presision) / Program.Cosh(x, Presision),

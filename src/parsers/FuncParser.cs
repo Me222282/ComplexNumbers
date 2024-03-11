@@ -63,6 +63,9 @@ namespace maths
                 case "log":
                     Expression = new Operation(new Term(10d, 0d), new Term(1d, 1d), Operator.Logarithm);
                     break;
+                case "arctan":
+                    Expression = new Function(FunctionType.Arctan);
+                    break;
                     
                 default:
                     return false;
