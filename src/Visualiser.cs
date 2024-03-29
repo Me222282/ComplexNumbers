@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Zene.Graphics;
 using Zene.Structs;
 using Zene.Windowing;
@@ -32,10 +33,13 @@ namespace maths
             _exp = expression;
             GenerateMap();
             _shader = BasicShader.GetInstance();
-            //_lighting = new LightingShader(1, 1);
-            //_lighting.SetLight(0, new Light(ColourF3.White, ColourF3.Zero, 0.0014, 0.000007, new Vector3(0, -1, 0), true));
+            _lighting = new LightingShader(1, 1);
+            _lighting.SetLight(0, new Light(ColourF3.White, ColourF3.Zero, 0.0014, 0.000007, _lightDir, true));
+            _lighting.ShadowDither = false;
             
-            _refCube = new DrawObject<Vector3, byte>(
+            _shadows = new Zene.Graphics.Z3D.ShadowMapper(10000, 10000);
+            
+            _refCube = CreateDrawObject(
                 new Vector3[]
                 {
                     new Vector3(-0.5, 0.5, 0.5), 
@@ -47,7 +51,7 @@ namespace maths
                     new Vector3(0.5, 0.5, -0.5),
                     new Vector3(0.5, -0.5, -0.5),
                     new Vector3(-0.5, -0.5, -0.5)
-                }, new byte[]
+                }, 1, new uint[]
                 {
                     // Front
                     0, 3, 2,
@@ -72,12 +76,11 @@ namespace maths
                     // Bottom
                     2, 3, 7,
                     7, 6, 2
-                }, 1, 0, AttributeSize.D3, BufferUsage.DrawFrequent
-            );
+                });
         }
         
         private DrawObject<Vector3, uint> _draw;
-        private DrawObject<Vector3, byte> _refCube;
+        private DrawObject<Vector3, uint> _refCube;
         
         private Vector2 _size = (10, 10);
         private int _dp = 1;
@@ -103,7 +106,7 @@ namespace maths
             }
         }
         
-        private Vector3 CameraPos = Vector3.Zero;
+        private Vector3 _cameraPos = Vector3.Zero;
 
         private Radian _rotateX = Radian.Percent(0.5);
         private Radian _rotateY = 0;
@@ -117,14 +120,18 @@ namespace maths
         private double _renderDist = 3000d;
         
         private BasicShader _shader;
-        //private LightingShader _lighting;
+        private LightingShader _lighting;
+        private Zene.Graphics.Z3D.ShadowMapper _shadows;
+        private Vector3 _lightDir = (-0.5, -1d, -0.5);
+        private double _dpSize = 15d;
+        private bool _doLighting = false;
+        private bool _lightRotate = false;
+        private readonly IMatrix _lightRotation = Matrix3.CreateRotationX(Radian.Percent(-0.000125)) * Matrix3.CreateRotationZ(Radian.Percent(0.000125));
+        private bool _matInv = true;
         
         private Mode _mode = Mode.Mag;
         private PolygonMode _poly = PolygonMode.Line;
-        private double Round(double v)
-        {
-            return Math.Round(v, _dp, MidpointRounding.AwayFromZero);
-        }
+        private double Round(double v) => Math.Round(v, _dp, MidpointRounding.AwayFromZero);
         private void GenerateMap()
         {
             if (_gradColour)
@@ -170,9 +177,9 @@ namespace maths
                 {
                     ind[i] = (uint)((y * w) + x);
                     i++;
-                    ind[i] = (uint)((y * w) + x + 1);
-                    i++;
                     ind[i] = (uint)(((y + 1) * w) + x);
+                    i++;
+                    ind[i] = (uint)((y * w) + x + 1);
                     i++;
                     
                     ind[i] = (uint)(((y + 1) * w) + x);
@@ -186,16 +193,13 @@ namespace maths
             
             fixed (Vector3* ptr = map)
             {
-                _draw = new DrawObject<Vector3, uint>(
-                    new ReadOnlySpan<Vector3>(ptr, map.Length), ind, 1, 0,
-                    AttributeSize.D3, BufferUsage.DrawFrequent);
+                _draw = CreateDrawObject(new ReadOnlySpan<Vector3>(ptr, map.Length), 1, ind);
             }
         }
         
         private unsafe void GenerateMapColour()
         {
             Vector2 end = _size / 2d;
-            
             Vector2 v = -end;
             
             Vector3[,] map = new Vector3[(int)(_size.Y / _precision) + 1, ((int)(_size.X / _precision) + 1) * 2];
@@ -207,7 +211,7 @@ namespace maths
                 {
                     map[pos.Y, pos.X * 2] = _exp.Calculate((Complex)v, _mode);
                     
-                    map[pos.Y, pos.X * 2 + 1] = (1d, (1 + Math.Sin(pos.Y)) / 2, (1 + Math.Cos(pos.X)) / 2);
+                    map[pos.Y, pos.X * 2 + 1] = (1d, (1 + Math.Sin(pos.Y * _precision * 10d)) / 2, (1 + Math.Cos(pos.X * _precision * 10d)) / 2);
                     
                     pos.X++;
                     v.X += _precision;
@@ -229,9 +233,9 @@ namespace maths
                 {
                     ind[i] = (uint)((y * w) + x);
                     i++;
-                    ind[i] = (uint)((y * w) + x + 1);
-                    i++;
                     ind[i] = (uint)(((y + 1) * w) + x);
+                    i++;
+                    ind[i] = (uint)((y * w) + x + 1);
                     i++;
                     
                     ind[i] = (uint)(((y + 1) * w) + x);
@@ -245,11 +249,19 @@ namespace maths
             
             fixed (Vector3* ptr = map)
             {
-                _draw = new DrawObject<Vector3, uint>(
-                    new ReadOnlySpan<Vector3>(ptr, map.Length), ind, 2, 0,
-                    AttributeSize.D3, BufferUsage.DrawFrequent);
+                _draw = CreateDrawObject(new ReadOnlySpan<Vector3>(ptr, map.Length), 2, ind);
                 _draw.AddAttribute(ShaderLocation.Colour, 1, AttributeSize.D3);
             }
+        }
+        
+        private DrawObject<Vector3, uint> CreateDrawObject(ReadOnlySpan<Vector3> verts, byte vs, uint[] inds)
+        {   
+            Zene.Graphics.Z3D.Object3D.AddNormals(verts, vs, inds, out List<Vector3> nv, out List<uint> ni);
+            DrawObject<Vector3, uint> dO = new DrawObject<Vector3, uint>(
+                nv.ToArray(), ni.ToArray(), (byte)(vs + 1), 0,
+                AttributeSize.D3, BufferUsage.DrawFrequent);
+            dO.AddAttribute(ShaderLocation.Normal, vs, AttributeSize.D3);
+            return dO;
         }
         
         protected override void OnUpdate(FrameEventArgs e)
@@ -274,44 +286,75 @@ namespace maths
             if (this[Mods.Alt])         { cameraMove *= 10; }
             if (this[Keys.Q])   { cameraMove *= 100; }
 
-            CameraPos += cameraMove * new Matrix3(_rotationMatrix);
+            _cameraPos += cameraMove * new Matrix3(_rotationMatrix);
             
-            //_lighting.CameraPosition = CameraPos;
-            //_lighting.DrawLighting = true;
-            //_lighting.ColourSource = ColourSource.UniformColour;
+            _lighting.CameraPosition = -_cameraPos;
+            _lighting.DrawLighting = true;
+            _lighting.ColourSource = ColourSource.UniformColour;
+            _lighting.Material = _matInv ?
+                new Material(Material.Source.Default, Material.Source.None, Shine.None) :
+                new Material(new ColourF3(1.3f, 1.2f, 1.1f), new ColourF3(0.6f, 0.3f, 0.5f), Shine.XL);
+            _lighting.AmbientLight = new Colour(12, 12, 15);
             
-            DrawManager.View = Matrix4.CreateTranslation(CameraPos) * Matrix4.CreateRotationY(_rotateY) *
+            e.Context.View = Matrix4.CreateTranslation(_cameraPos) * Matrix4.CreateRotationY(_rotateY) *
                 Matrix4.CreateRotationX(_rotateX) * Matrix4.CreateRotationZ(_rotateZ);
             
+            if (_doLighting)
+            {
+                if (_lightRotate)
+                {
+                    _lightDir *= _lightRotation;
+                }
+                
+                _shadows.Projection = Matrix4.CreateOrthographic(_dpSize, _dpSize, 10000d, -10000d);
+                _shadows.View = Matrix4.LookAt(Vector3.Zero, _lightDir, (0d, 1d, 0d));
+                State.PolygonMode = PolygonMode.Fill;
+                _shadows.Framebuffer.Clear(BufferBit.Depth);
+                //_shadows.Draw(_refCube);
+                Render(_shadows, _lighting);
+                
+                _lighting.ShadowMap = _shadows.DepthMap;
+                _lighting.LightSpaceMatrix = _shadows.View * _shadows.Projection;
+                
+                _lighting.SetLightPosition(0, (_lightDir, 0d));
+            }
             
             Framebuffer.DepthState.Testing = true;
-            DrawManager.Shader = _shader;
-            //DrawManager.Shader = _lighting;
-            DrawManager.Shader.Colour = ColourF.Orange;
+            IBasicShader ibs = _shader;
+            if (_doLighting)
+            {
+                ibs = _lighting;
+            }
+            e.Context.Shader = ibs;
+            State.PolygonMode = _poly;
+            Render(e.Context, ibs);
+        }
+        private void Render(IDrawingContext dc, IBasicShader shader)
+        {
+            shader.Colour = ColourF.Orange;
             
             if (_gradColour)
             {
-                DrawManager.Shader.ColourSource = ColourSource.AttributeColour;
+                shader.ColourSource = ColourSource.AttributeColour;
             }
             else
             {
-                DrawManager.Shader.ColourSource = ColourSource.UniformColour;
+                shader.ColourSource = ColourSource.UniformColour;
             }
             
-            State.PolygonMode = _poly;
-            DrawManager.Model = Matrix4.CreateScale(1d, -1d, 1d);
-            e.Context.Draw(_draw);
+            dc.Model = Matrix4.CreateScale(1d, -1d, 1d);
+            dc.Draw(_draw);
             
-            DrawManager.Shader.ColourSource = ColourSource.UniformColour;
-            DrawManager.Shader.Colour = ColourF.Aqua;
-            e.Context.Draw(_refCube);
+            shader.ColourSource = ColourSource.UniformColour;
+            shader.Colour = ColourF.Aqua;
+            dc.Draw(_refCube);
         }
-
+        
         protected override void OnSizeChange(VectorIEventArgs e)
         {
             base.OnSizeChange(e);
             
-            DrawManager.Projection = Matrix4.CreatePerspectiveFieldOfView(
+            DrawContext.Projection = Matrix4.CreatePerspectiveFieldOfView(
                 Radian.Degrees(_fov), e.X / (double)e.Y, 0.1, _renderDist);
         }
         
@@ -331,11 +374,16 @@ namespace maths
             }
             if (e[Keys.BackSpace])
             {
-                CameraPos = Vector3.Zero;
+                _cameraPos = Vector3.Zero;
                 _rotateX = Radian.Percent(0.5);
                 _rotateY = 0;
                 _rotateZ = 0;
                 
+                return;
+            }
+            if (e[Keys.M] && e[Mods.Shift])
+            {
+                _matInv = !_matInv;
                 return;
             }
             if (e[Keys.M])
@@ -382,15 +430,29 @@ namespace maths
                 _poly = PolygonMode.Fill;
                 return;
             }
+            if (e[Keys.Equal] && this[Keys.B])
+            {
+                _dpSize *= 2d;
+                GenerateMap();
+                return;
+            }
+            if (e[Keys.Minus] && this[Keys.B])
+            {
+                _dpSize /= 2d;
+                GenerateMap();
+                return;
+            }
             if (e[Keys.Equal] && e[Mods.Shift])
             {
                 _size *= 2d;
+                _dpSize *= 2d;
                 GenerateMap();
                 return;
             }
             if (e[Keys.Minus] && e[Mods.Shift])
             {
                 _size /= 2d;
+                _dpSize /= 2d;
                 GenerateMap();
                 return;
             }
@@ -410,6 +472,16 @@ namespace maths
             {
                 _gradColour = !_gradColour;
                 GenerateMap();
+                return;
+            }
+            if (e[Keys.L])
+            {
+                _doLighting = !_doLighting;
+                return;
+            }
+            if (e[Keys.R])
+            {
+                _lightRotate = !_lightRotate;
                 return;
             }
         }
@@ -452,7 +524,7 @@ namespace maths
                 if (_fov <= 0d) { _fov = 0.5; }
             }
             
-            DrawManager.Projection = Matrix4.CreatePerspectiveFieldOfView(
+            DrawContext.Projection = Matrix4.CreatePerspectiveFieldOfView(
                 Radian.Degrees(_fov), Size.X / (double)Size.Y, 0.1, _renderDist);
         }
     }

@@ -25,13 +25,13 @@ namespace maths
                     try
                     {
                         decode.Decode(xy);
+                        graph.Y = decode.Expression.Simplify();
                     }
                     catch (Exception)
                     {
                         Console.WriteLine("An error occurred.");
                         continue;
                     }
-                    graph.Y = decode.Expression.Simplify();
                     
                     Console.WriteLine(graph.Y);
                 }
@@ -43,25 +43,25 @@ namespace maths
                     try
                     {
                         decode.Decode(tx);
+                        graph.X = decode.Expression.Simplify();
                     }
                     catch (Exception)
                     {
                         Console.WriteLine("An error occurred.");
                         continue;
                     }
-                    graph.X = decode.Expression.Simplify();
                     Console.WriteLine("Equation for Y:");
                     string ty = Console.ReadLine();
                     try
                     {
                         decode.Decode(ty);
+                        graph.Y = decode.Expression.Simplify();
                     }
                     catch (Exception)
                     {
                         Console.WriteLine("An error occurred.");
                         continue;
                     }
-                    graph.Y = decode.Expression.Simplify();
                     
                     Console.WriteLine(graph.X);
                     Console.WriteLine(graph.Y);
@@ -74,37 +74,37 @@ namespace maths
                     try
                     {
                         decode.Decode(tx);
+                        graph.X = decode.Expression.Simplify();
                     }
                     catch (Exception)
                     {
                         Console.WriteLine("An error occurred.");
                         continue;
                     }
-                    graph.X = decode.Expression.Simplify();
                     Console.WriteLine("Equation for Y:");
                     string ty = Console.ReadLine();
                     try
                     {
                         decode.Decode(ty);
+                        graph.Y = decode.Expression.Simplify();
                     }
                     catch (Exception)
                     {
                         Console.WriteLine("An error occurred.");
                         continue;
                     }
-                    graph.Y = decode.Expression.Simplify();
                     Console.WriteLine("Equation for Z:");
                     string tz = Console.ReadLine();
                     try
                     {
                         decode.Decode(tz);
+                        graph.Z = decode.Expression.Simplify();
                     }
                     catch (Exception)
                     {
                         Console.WriteLine("An error occurred.");
                         continue;
                     }
-                    graph.Z = decode.Expression.Simplify();
                     
                     Console.WriteLine(graph.X);
                     Console.WriteLine(graph.Y);
@@ -250,5 +250,6 @@ namespace maths
             
             return r + (I)i;
         }
+        public static Complex Arctanh(Complex c) => (I)(-1d) * Arctan(c * (I)(-1d));
     }
 }
