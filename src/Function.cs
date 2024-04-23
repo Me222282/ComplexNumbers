@@ -44,7 +44,7 @@ namespace maths
                 FunctionType.Arccos => throw new Exception(),//Math.Acos(x),
                 FunctionType.Arctan => Program.Arctan(x),
                 FunctionType.Sinh => Program.Sinh(x, Presision),
-                FunctionType.Cosh => Program.Cos(x, Presision),
+                FunctionType.Cosh => Program.Cosh(x, Presision),
                 FunctionType.Tanh => Program.Sinh(x, Presision) / Program.Cosh(x, Presision),
                 FunctionType.Arcsinh => throw new Exception(),//Math.Asinh(x),
                 FunctionType.Arccosh => throw new Exception(),//Math.Acosh(x),
