@@ -319,7 +319,7 @@ namespace maths
                 _lighting.SetLightPosition(0, (_lightDir, 0d));
             }
             
-            Framebuffer.DepthState.Testing = true;
+            e.Context.DepthState.Testing = true;
             IBasicShader ibs = _shader;
             if (_doLighting)
             {
