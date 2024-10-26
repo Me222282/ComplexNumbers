@@ -308,7 +308,7 @@ namespace maths
                 
                 _shadows.Projection = Matrix4.CreateOrthographic(_dpSize, _dpSize, 10000d, -10000d);
                 _shadows.View = Matrix4.LookAt(Vector3.Zero, _lightDir, (0d, 1d, 0d));
-                State.PolygonMode = PolygonMode.Fill;
+                e.Context.RenderState.PolygonMode = PolygonMode.Fill;
                 _shadows.Framebuffer.Clear(BufferBit.Depth);
                 //_shadows.Draw(_refCube);
                 Render(_shadows, _lighting);
@@ -326,7 +326,7 @@ namespace maths
                 ibs = _lighting;
             }
             e.Context.Shader = ibs;
-            State.PolygonMode = _poly;
+            e.Context.RenderState.PolygonMode = _poly;
             Render(e.Context, ibs);
         }
         private void Render(IDrawingContext dc, IBasicShader shader)
